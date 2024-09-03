@@ -1,8 +1,8 @@
 # Decorators
 
-**Decorators are deprecated, please join the discussion at [#1574](https://github.com/wycats/handlebars.js/issues/1574) to see what we can do about it.**
+**Decorators are deprecated, please join the discussion at [#1574](https://github.com/handlebars-lang/handlebars.js/issues/1574) to see what we can do about it.**
 
-Decorators allow for blocks to be annotated with metadata or wrapped in functionality prior to execution of the block. This may be used to communicate with the containing helper or to setup a particular state in the system prior to running the block.
+Decorators allow for blocks to be annotated with metadata or wrapped in functionality prior to execution of the block. This may be used to communicate with the containing helper or to set up a particular state in the system prior to running the block.
 
 Decorators are registered through similar methods as helpers, `registerDecorators` and `unregisterDecorators`. These can then be referenced via the friendly name in the template using the `{{* decorator}}` and `{{#* decorator}}{/decorator}}` syntaxes. These syntaxes are derivatives of the normal mustache syntax and as such have all of the same argument and whitespace behaviors.
 
@@ -18,4 +18,4 @@ Decorators are executed when the block program is instantiated and are passed `(
 
 Decorators may set values on `props` or return a modified function that wraps `program` in particular behaviors. If the decorator returns nothing, then `program` is left unaltered.
 
-The [inline partial](https://github.com/wycats/handlebars.js/blob/master/lib/handlebars/decorators/inline.js) implementation provides an example of decorators being used for both metadata and wrapping behaviors.
+The [inline partial](https://github.com/handlebars-lang/handlebars.js/blob/master/lib/handlebars/decorators/inline.js) implementation provides an example of decorators being used for both metadata and wrapping behaviors.

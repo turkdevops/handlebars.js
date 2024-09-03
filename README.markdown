@@ -1,7 +1,9 @@
-[![Travis Build Status](https://img.shields.io/travis/handlebars-lang/handlebars.js/master.svg)](https://travis-ci.org/github/handlebars-lang/handlebars.js)
-[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/wycats/handlebars.js?branch=master&svg=true)](https://ci.appveyor.com/project/wycats/handlebars-js)
-[![Selenium Test Status](https://saucelabs.com/buildstatus/handlebars)](https://saucelabs.com/u/handlebars)
+[![CI Build Status](https://github.com/handlebars-lang/handlebars.js/actions/workflows/ci.yml/badge.svg)](https://github.com/handlebars-lang/handlebars.js/actions/workflows/ci.yml)
 [![jsDelivr Hits](https://data.jsdelivr.com/v1/package/npm/handlebars/badge?style=rounded)](https://www.jsdelivr.com/package/npm/handlebars)
+[![npm downloads](https://badgen.net/npm/dm/handlebars)](https://www.npmjs.com/package/handlebars)
+[![npm version](https://badgen.net/npm/v/handlebars)](https://www.npmjs.com/package/handlebars)
+[![Bundle size](https://badgen.net/bundlephobia/minzip/handlebars?label=minified%20%2B%20gzipped)](https://bundlephobia.com/package/handlebars)
+[![Install size](https://packagephobia.com/badge?p=handlebars)](https://packagephobia.com/result?p=handlebars)
 
 Handlebars.js
 =============
@@ -10,7 +12,7 @@ Handlebars provides the power necessary to let you build **semantic templates** 
 Handlebars is largely compatible with Mustache templates. In most cases it is possible to swap out Mustache with Handlebars and continue using your current templates.
 
 Checkout the official Handlebars docs site at
-[https://handlebarsjs.com/](https://handlebarsjs.com) and the live demo at [http://tryhandlebarsjs.com/](http://tryhandlebarsjs.com/).
+[handlebarsjs.com](https://handlebarsjs.com) and try our [live demo](https://handlebarsjs.com/playground.html).
 
 Installing
 ----------
@@ -21,7 +23,7 @@ Usage
 -----
 In general, the syntax of Handlebars.js templates is a superset
 of Mustache templates. For basic syntax, check out the [Mustache
-manpage](http://mustache.github.com/mustache.5.html).
+manpage](https://mustache.github.io/mustache.5.html).
 
 Once you have a template, use the `Handlebars.compile` method to compile
 the template into a function. The generated function takes a context
@@ -63,7 +65,7 @@ templates easier and also changes a tiny detail of how partials work.
 - [Literal Values](https://handlebarsjs.com/guide/expressions.html#literal-segments)
 - [Delimited Comments](https://handlebarsjs.com/guide/#template-comments)
 
-Block expressions have the same syntax as mustache sections but should not be confused with one another. Sections are akin to an implicit `each` or `with` statement depending on the input data and helpers are explicit pieces of code that are free to implement whatever behavior they like. The [mustache spec](http://mustache.github.io/mustache.5.html) defines the exact behavior of sections. In the case of name conflicts, helpers are given priority.
+Block expressions have the same syntax as mustache sections but should not be confused with one another. Sections are akin to an implicit `each` or `with` statement depending on the input data and helpers are explicit pieces of code that are free to implement whatever behavior they like. The [mustache spec](https://mustache.github.io/mustache.5.html) defines the exact behavior of sections. In the case of name conflicts, helpers are given priority.
 
 ### Compatibility
 
@@ -77,19 +79,16 @@ There are a few Mustache behaviors that Handlebars does not implement.
 Supported Environments
 ----------------------
 
-Handlebars has been designed to work in any ECMAScript 3 environment. This includes
+Handlebars has been designed to work in any ECMAScript 2020 environment. This includes
 
-- Node.js 10+
+- Node.js
 - Chrome
 - Firefox
-- Safari 5+
-- Opera 11+
-- IE 6+
+- Safari
+- Edge
 
-Older versions and other runtimes are likely to work but have not been formally
-tested. The compiler requires `JSON.stringify` to be implemented natively or via a polyfill. If using the precompiler this is not necessary.
+If you need to support older environments, use Handlebars version 4.
 
-[![Selenium Test Status](https://saucelabs.com/browser-matrix/handlebars.svg)](https://saucelabs.com/u/handlebars)
 
 Performance
 -----------
@@ -102,7 +101,7 @@ does have some big performance advantages. Justin Marney, a.k.a.
 [gotascii](http://github.com/gotascii), confirmed that with an
 [independent test](http://sorescode.com/2010/09/12/benchmarks.html). The
 rewritten Handlebars (current version) is faster than the old version,
-with many [performance tests](https://travis-ci.org/handlebars-lang/handlebars.js/builds/33392182#L538) being 5 to 7 times faster than the Mustache equivalent.
+with many performance tests being 5 to 7 times faster than the Mustache equivalent.
 
 
 Upgrading
@@ -113,7 +112,7 @@ See [release-notes.md](https://github.com/handlebars-lang/handlebars.js/blob/mas
 If you are using Handlebars in production, please regularly look for issues labeled
 [possibly breaking](https://github.com/handlebars-lang/handlebars.js/issues?q=is%3Aopen+is%3Aissue+label%3A%22possibly+breaking%22).
 If this label is applied to an issue, it means that the requested change is probably not a breaking change,
-but since Handlebars is widely in use by a lot of people, chances are always there that it breaks somebodies build.
+but since Handlebars is widely in use by a lot of people, there's always a chance that it breaks somebody's build.
 
 
 Known Issues
@@ -125,45 +124,35 @@ See [FAQ.md](https://github.com/handlebars-lang/handlebars.js/blob/master/FAQ.md
 Handlebars in the Wild
 ----------------------
 
-* [Assemble](http://assemble.io), by [@jonschlinkert](https://github.com/jonschlinkert)
-  and [@doowb](https://github.com/doowb), is a static site generator that uses Handlebars.js
-  as its template engine.
-* [Cory](https://github.com/leo/cory), by [@leo](https://github.com/leo), is another tiny static site generator
-* [CoSchedule](http://coschedule.com) An editorial calendar for WordPress that uses Handlebars.js
-* [dashbars](https://github.com/pismute/dashbars) A modern helper library for Handlebars.js.
-* [Ember.js](http://www.emberjs.com) makes Handlebars.js the primary way to
-  structure your views, also with automatic data binding support.
-* [Ghost](https://ghost.org/) Just a blogging platform.
-* [handlebars_assets](http://github.com/leshill/handlebars_assets): A Rails Asset Pipeline gem
-  from Les Hill (@leshill).
-* [handlebars-helpers](https://github.com/assemble/handlebars-helpers) is an extensive library
-  with 100+ handlebars helpers.
-* [handlebars-layouts](https://github.com/shannonmoeller/handlebars-layouts) is a set of helpers which implement extendible and embeddable layout blocks as seen in other popular templating languages.
-* [hbs](http://github.com/donpark/hbs): An Express.js view engine adapter for Handlebars.js,
-  from Don Park.
-* [koa-hbs](https://github.com/jwilm/koa-hbs): [koa](https://github.com/koajs/koa) generator based
-  renderer for Handlebars.js.
-* [jblotus](http://github.com/jblotus) created [http://tryhandlebarsjs.com](http://tryhandlebarsjs.com)
-  for anyone who would like to try out Handlebars.js in their browser.
-* [jQuery plugin](http://71104.github.io/jquery-handlebars/): allows you to use
-  Handlebars.js with [jQuery](http://jquery.com/).
-* [Lumbar](http://walmartlabs.github.io/lumbar) provides easy module-based template management for
-  handlebars projects.
-* [Marionette.Handlebars](https://github.com/hashchange/marionette.handlebars) adds support for Handlebars and Mustache templates to Marionette.
-* [sammy.js](http://github.com/quirkey/sammy) by Aaron Quint, a.k.a. quirkey,
-  supports Handlebars.js as one of its template plugins.
-* [SproutCore](http://www.sproutcore.com) uses Handlebars.js as its main
-  templating engine, extending it with automatic data binding support.
-* [YUI](http://yuilibrary.com/yui/docs/handlebars/) implements a port of handlebars
-* [Swag](https://github.com/elving/swag) by [@elving](https://github.com/elving) is a growing collection of helpers for handlebars.js. Give your handlebars.js templates some swag son!
-* [DOMBars](https://github.com/blakeembrey/dombars) is a DOM-based templating engine built on the Handlebars parser and runtime **DEPRECATED**
-* [promised-handlebars](https://github.com/nknapp/promised-handlebars) is a wrapper for Handlebars that allows helpers to return Promises.
-* [just-handlebars-helpers](https://github.com/leapfrogtechnology/just-handlebars-helpers) A fully tested lightweight package with common Handlebars helpers.
-* [incremental-bars](https://github.com/atomictag/incremental-bars) adds support for [incremental-dom](https://github.com/google/incremental-dom) as template target to Handlebars.
 * [apiDoc](https://github.com/apidoc/apidoc) apiDoc uses handlebars as parsing engine for api documentation view generation.
-* [handlebars-wax](https://github.com/shannonmoeller/handlebars-wax) The missing Handlebars API. Effortless registration of data, partials, helpers, and decorators using file-system globs, modules, and plain-old JavaScript objects.
-* [openVALIDATION](https://github.com/openvalidation/openvalidation) a natural language compiler for validation rules. Generates program code in Java, JavaScript, C#, Python and Rust with handlebars.
+* [Assemble](https://assemble.io), by [@jonschlinkert](https://github.com/jonschlinkert) and [@doowb](https://github.com/doowb), is a static site generator that uses Handlebars.js as its template engine.
+* [CoSchedule](https://coschedule.com) An editorial calendar for WordPress that uses Handlebars.js.
+* [Ember.js](https://www.emberjs.com) makes Handlebars.js the primary way to structure your views, also with automatic data binding support.
+* [express-handlebars](https://github.com/express-handlebars/express-handlebars) A Handlebars view engine for Express which doesn't suck.
+* [express-hbs](https://github.com/TryGhost/express-hbs) Express Handlebars template engine with inheritance, partials, i18n and async helpers.
+* [Ghost](https://ghost.org/) Just a blogging platform.
 * [handlebars-action](https://github.com/marketplace/actions/handlebars-action) A GitHub action to transform files in your repository with Handlebars templating.
+* [handlebars_assets](https://github.com/leshill/handlebars_assets) A Rails Asset Pipeline gem from Les Hill (@leshill).
+* [handlebars-helpers](https://github.com/assemble/handlebars-helpers) is an extensive library with 100+ handlebars helpers.
+* [handlebars-layouts](https://github.com/shannonmoeller/handlebars-layouts) is a set of helpers which implement extensible and embeddable layout blocks as seen in other popular templating languages.
+* [handlebars-loader](https://github.com/pcardune/handlebars-loader) A handlebars template loader for webpack.
+* [handlebars-wax](https://github.com/shannonmoeller/handlebars-wax) The missing Handlebars API. Effortless registration of data, partials, helpers, and decorators using file-system globs, modules, and plain-old JavaScript objects.
+* [hbs](https://github.com/pillarjs/hbs) An Express.js view engine adapter for Handlebars.js, from Don Park.
+* [html-bundler-webpack-plugin](https://github.com/webdiscus/html-bundler-webpack-plugin) The webpack plugin to compile templates, [supports Handlebars](https://github.com/webdiscus/html-bundler-webpack-plugin#using-template-handlebars).
+* [incremental-bars](https://github.com/atomictag/incremental-bars) adds support for [incremental-dom](https://github.com/google/incremental-dom) as template target to Handlebars.
+* [jblotus](https://github.com/jblotus) created [http://tryhandlebarsjs.com](http://tryhandlebarsjs.com) for anyone who would like to try out Handlebars.js in their browser.
+* [jQuery plugin](https://71104.github.io/jquery-handlebars/) allows you to use Handlebars.js with [jQuery](http://jquery.com/).
+* [just-handlebars-helpers](https://github.com/leapfrogtechnology/just-handlebars-helpers) A fully tested lightweight package with common Handlebars helpers.
+* [koa-hbs](https://github.com/jwilm/koa-hbs) [koa](https://github.com/koajs/koa) generator based renderer for Handlebars.js.
+* [Marionette.Handlebars](https://github.com/hashchange/marionette.handlebars) adds support for Handlebars and Mustache templates to Marionette.
+* [openVALIDATION](https://github.com/openvalidation/openvalidation) a natural language compiler for validation rules. Generates program code in Java, JavaScript, C#, Python and Rust with handlebars.
+* [Plop](https://plopjs.com/) is a micro-generator framework that makes it easy to create files with a level of uniformity.
+* [promised-handlebars](https://github.com/nknapp/promised-handlebars) is a wrapper for Handlebars that allows helpers to return Promises.
+* [sammy.js](https://github.com/quirkey/sammy) by Aaron Quint, a.k.a. quirkey, supports Handlebars.js as one of its template plugins.
+* [Swag](https://github.com/elving/swag) by [@elving](https://github.com/elving) is a growing collection of helpers for handlebars.js. Give your handlebars.js templates some swag son!
+* [SproutCore](https://www.sproutcore.com) uses Handlebars.js as its main templating engine, extending it with automatic data binding support.
+* [vite-plugin-handlebars](https://github.com/alexlafroscia/vite-plugin-handlebars) A package for Vite 2. Allows for running your HTML files through the Handlebars compiler.
+* [YUI](https://yuilibrary.com/yui/docs/handlebars/) implements a port of handlebars.
 
 External Resources
 ------------------

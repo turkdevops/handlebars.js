@@ -26,7 +26,6 @@
       window.expect = chai.expect;
       mocha.setup('bdd');
     </script>
-    <script src="/spec/vendor/json2.js"></script>
     <script src="/spec/vendor/require.js"></script>
 
     <script src="/spec/env/common.js"></script>
@@ -54,7 +53,7 @@
           }
           var runner = mocha.run();
 
-          //Reporting for saucelabs
+          // Reporting to test-runner
           var failedTests = [];
           runner.on('end', function(){
             window.mochaResults = runner.stats;

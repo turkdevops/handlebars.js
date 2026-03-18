@@ -2,7 +2,7 @@ const fs = require('fs');
 const { execCommand, FileTestHelper } = require('cli-testlab');
 const Handlebars = require('../../lib');
 
-const cli = 'node ./bin/handlebars.js';
+const cli = 'node ./bin/handlebars.mjs';
 
 expect.extend({
   toEqualWithRelaxedSpace(received, expected) {

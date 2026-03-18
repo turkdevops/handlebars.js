@@ -16,7 +16,7 @@
     "url": "https://github.com/handlebars-lang/handlebars.js.git"
   },
   "bin": {
-    "handlebars": "bin/handlebars.js"
+    "handlebars": "bin/handlebars.mjs"
   },
   "files": [
     "bin",

@@ -1,5 +1,5 @@
 Precompile handlebar templates.
-Usage: handlebars.js [template|directory]...
+Usage: handlebars.mjs [template|directory]...
 
 Options:
   -f, --output         Output File                                                                              [string]

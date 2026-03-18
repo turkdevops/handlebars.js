@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs')(process.argv.slice(2))
+import { createRequire } from 'node:module';
+import yargs from 'yargs';
+
+const require = createRequire(import.meta.url);
+const Precompiler = require('../dist/cjs/precompiler');
+
+const parser = yargs(process.argv.slice(2))
   .usage('Precompile handlebar templates.\nUsage: $0 [template|directory]...')
   .help(false)
   .version(false)
@@ -107,18 +113,17 @@ const yargs = require('yargs')(process.argv.slice(2))
   })
   .wrap(120);
 
-const argv = yargs.parseSync();
+const argv = parser.parseSync();
 argv.files = argv._;
 delete argv._;
 
-const Precompiler = require('../dist/cjs/precompiler');
 Precompiler.loadTemplates(argv, function (err, opts) {
   if (err) {
     throw err;
   }
 
   if (opts.help || (!opts.templates.length && !opts.version)) {
-    yargs.showHelp('log');
+    parser.showHelp('log');
   } else {
     Precompiler.cli(opts);
   }

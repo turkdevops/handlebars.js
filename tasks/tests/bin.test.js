@@ -70,7 +70,7 @@ const testCases = [
   {
     binInputParameters: ['-v'],
     outputLocation: 'stdout',
-    expectedOutput: require('../../package.json').version,
+    expectedOutput: require('../../lib').VERSION,
   },
   {
     binInputParameters: [

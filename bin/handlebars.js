@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-const yargs = require('yargs')
+const yargs = require('yargs')(process.argv.slice(2))
   .usage('Precompile handlebar templates.\nUsage: $0 [template|directory]...')
+  .help(false)
+  .version(false)
   .option('f', {
     type: 'string',
     description: 'Output File',
@@ -105,7 +107,7 @@ const yargs = require('yargs')
   })
   .wrap(120);
 
-const argv = yargs.argv;
+const argv = yargs.parseSync();
 argv.files = argv._;
 delete argv._;
 
@@ -116,7 +118,7 @@ Precompiler.loadTemplates(argv, function (err, opts) {
   }
 
   if (opts.help || (!opts.templates.length && !opts.version)) {
-    yargs.showHelp();
+    yargs.showHelp('log');
   } else {
     Precompiler.cli(opts);
   }

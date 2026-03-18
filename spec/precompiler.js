@@ -33,7 +33,7 @@ describe('precompiler', function () {
    * @param {Error} loadError the error that should be thrown if uglify is loaded
    * @param {function} callback a callback-function to run when the mock is active.
    */
-  function mockRequireUglify(loadError, callback) {
+  async function mockRequireUglify(loadError, callback) {
     var Module = require('module');
     var _resolveFilename = Module._resolveFilename;
     delete require.cache[require.resolve('uglify-js')];
@@ -45,7 +45,7 @@ describe('precompiler', function () {
       return _resolveFilename.call(this, request, mod);
     };
     try {
-      callback();
+      await callback();
     } finally {
       Module._resolveFilename = _resolveFilename;
       delete require.cache[require.resolve('uglify-js')];
@@ -87,40 +87,40 @@ describe('precompiler', function () {
     Precompiler.cli({ templates: [], version: true });
     expect(log).toBe(Handlebars.VERSION);
   });
-  it('should throw if lacking templates', function () {
-    expect(function () {
-      Precompiler.cli({ templates: [] });
-    }).toThrow('Must define at least one template or directory.');
+  it('should throw if lacking templates', async function () {
+    await expect(Precompiler.cli({ templates: [] })).rejects.toThrow(
+      'Must define at least one template or directory.'
+    );
   });
-  it('should handle empty/filtered directories', function () {
-    Precompiler.cli({ hasDirectory: true, templates: [] });
+  it('should handle empty/filtered directories', async function () {
+    await Precompiler.cli({ hasDirectory: true, templates: [] });
     // Success is not throwing
   });
-  it('should throw when combining simple and minimized', function () {
-    expect(function () {
-      Precompiler.cli({ templates: [__dirname], simple: true, min: true });
-    }).toThrow('Unable to minimize simple output');
+  it('should throw when combining simple and minimized', async function () {
+    await expect(
+      Precompiler.cli({ templates: [__dirname], simple: true, min: true })
+    ).rejects.toThrow('Unable to minimize simple output');
   });
-  it('should throw when combining simple and multiple templates', function () {
-    expect(function () {
+  it('should throw when combining simple and multiple templates', async function () {
+    await expect(
       Precompiler.cli({
         templates: [
           __dirname + '/artifacts/empty.handlebars',
           __dirname + '/artifacts/empty.handlebars',
         ],
         simple: true,
-      });
-    }).toThrow('Unable to output multiple templates in simple mode');
+      })
+    ).rejects.toThrow('Unable to output multiple templates in simple mode');
   });
-  it('should throw when missing name', function () {
-    expect(function () {
-      Precompiler.cli({ templates: [{ source: '' }], amd: true });
-    }).toThrow('Name missing for template');
+  it('should throw when missing name', async function () {
+    await expect(
+      Precompiler.cli({ templates: [{ source: '' }], amd: true })
+    ).rejects.toThrow('Name missing for template');
   });
-  it('should throw when combining simple and directories', function () {
-    expect(function () {
-      Precompiler.cli({ hasDirectory: true, templates: [1], simple: true });
-    }).toThrow('Unable to output multiple templates in simple mode');
+  it('should throw when combining simple and directories', async function () {
+    await expect(
+      Precompiler.cli({ hasDirectory: true, templates: [1], simple: true })
+    ).rejects.toThrow('Unable to output multiple templates in simple mode');
   });
 
   it('should output simple templates', function () {
@@ -227,42 +227,42 @@ describe('precompiler', function () {
     expect(log).toBe('min');
   });
 
-  it('should omit minimization gracefully, if uglify-js is missing', function () {
+  it('should omit minimization gracefully, if uglify-js is missing', async function () {
     var error = new Error("Cannot find module 'uglify-js'");
     error.code = 'MODULE_NOT_FOUND';
-    mockRequireUglify(error, function () {
+    await mockRequireUglify(error, async function () {
       var Precompiler = require('../dist/cjs/precompiler');
       Handlebars.precompile = function () {
         return 'amd';
       };
-      Precompiler.cli({ templates: [emptyTemplate], min: true });
+      await Precompiler.cli({ templates: [emptyTemplate], min: true });
       expect(log).toMatch(/template\(amd\)/);
       expect(log).toMatch(/\n/);
       expect(errorLog).toMatch(/Code minimization is disabled/);
     });
   });
 
-  it('should fail on errors (other than missing module) while loading uglify-js', function () {
-    mockRequireUglify(new Error('Mock Error'), function () {
-      expect(function () {
-        var Precompiler = require('../dist/cjs/precompiler');
-        Handlebars.precompile = function () {
-          return 'amd';
-        };
-        Precompiler.cli({ templates: [emptyTemplate], min: true });
-      }).toThrow('Mock Error');
+  it('should fail on errors (other than missing module) while loading uglify-js', async function () {
+    await mockRequireUglify(new Error('Mock Error'), async function () {
+      var Precompiler = require('../dist/cjs/precompiler');
+      Handlebars.precompile = function () {
+        return 'amd';
+      };
+      await expect(
+        Precompiler.cli({ templates: [emptyTemplate], min: true })
+      ).rejects.toThrow('Mock Error');
     });
   });
 
-  it('should output map', function () {
-    Precompiler.cli({ templates: [emptyTemplate], map: 'foo.js.map' });
+  it('should output map', async function () {
+    await Precompiler.cli({ templates: [emptyTemplate], map: 'foo.js.map' });
 
     expect(file).toBe('foo.js.map');
     expect(log.match(/sourceMappingURL=/g).length).toBe(1);
   });
 
-  it('should output map', function () {
-    Precompiler.cli({
+  it('should output map with minification', async function () {
+    await Precompiler.cli({
       templates: [emptyTemplate],
       min: true,
       map: 'foo.js.map',

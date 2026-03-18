@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { exec } = require('child_process');
 const { execCommand, FileTestHelper } = require('cli-testlab');
 const Handlebars = require('../../lib');
 
@@ -242,6 +243,21 @@ describe('bin/handlebars', function () {
       expect(result.stdout).toEqualWithRelaxedSpace(
         expectedFile('./spec/expected/empty.name.amd.js')
       );
+    });
+  });
+
+  describe('error handling', function () {
+    it('should not produce unhandled promise rejections on async errors', async function () {
+      const { stderr } = await new Promise((resolve) => {
+        exec(
+          `node --unhandled-rejections=warn ./bin/handlebars.mjs -i "<div>test</div>" -N test --map /nonexistent/dir/test.map`,
+          (error, stdout, stderr) => {
+            resolve({ exitCode: error ? error.code : 0, stderr });
+          }
+        );
+      });
+
+      expect(stderr).not.toMatch(/unhandled/i);
     });
   });
 

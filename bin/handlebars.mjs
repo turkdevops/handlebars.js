@@ -125,6 +125,12 @@ Precompiler.loadTemplates(argv, function (err, opts) {
   if (opts.help || (!opts.templates.length && !opts.version)) {
     parser.showHelp('log');
   } else {
-    Precompiler.cli(opts);
+    // cli() is async (returns a Promise), so errors would become unhandled
+    // rejections. Re-throw via nextTick to surface them as uncaught exceptions.
+    Promise.resolve(Precompiler.cli(opts)).catch((error) => {
+      process.nextTick(() => {
+        throw error;
+      });
+    });
   }
 });

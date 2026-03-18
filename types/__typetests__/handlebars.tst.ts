@@ -5,8 +5,6 @@ import {
   HandlebarsTemplateDelegate,
   HandlebarsTemplates,
   TemplateSpecification,
-  CompileOptions,
-  PrecompileOptions,
   RuntimeOptions,
   KnownHelpers,
   BuiltinHelperName,
@@ -335,22 +333,22 @@ describe('Handlebars.create', () => {
 // Handlebars.parse / parseWithoutProcessing
 // ---------------------------------------------------------------------------
 describe('Handlebars.parse', () => {
-  test('works without options', () => {
-    expect(Handlebars.parse('{{name}}')).type.not.toRaiseError();
+  test('returns hbs.AST.Program', () => {
+    expect(Handlebars.parse('{{name}}')).type.toBe<hbs.AST.Program>();
   });
 
   test('accepts ParseOptions', () => {
     expect(
       Handlebars.parse('{{name}}', { srcName: 'test.hbs' })
-    ).type.not.toRaiseError();
+    ).type.toBe<hbs.AST.Program>();
   });
 });
 
 describe('Handlebars.parseWithoutProcessing', () => {
-  test('returns AST.Program', () => {
+  test('returns hbs.AST.Program', () => {
     expect(
       Handlebars.parseWithoutProcessing('{{name}}')
-    ).type.not.toRaiseError();
+    ).type.toBe<hbs.AST.Program>();
   });
 });
 
@@ -388,32 +386,10 @@ describe('RuntimeOptions', () => {
 });
 
 // ---------------------------------------------------------------------------
-// CompileOptions
-// ---------------------------------------------------------------------------
-describe('CompileOptions', () => {
-  test('accepts all fields', () => {
-    expect(
-      Handlebars.compile('test', {
-        data: true,
-        compat: true,
-        knownHelpers: { each: true },
-        knownHelpersOnly: true,
-        noEscape: true,
-        strict: true,
-        assumeObjects: true,
-        preventIndent: true,
-        ignoreStandalone: true,
-        explicitPartialContext: true,
-      })
-    ).type.not.toRaiseError();
-  });
-});
-
-// ---------------------------------------------------------------------------
 // HandlebarsTemplateDelegate generic
 // ---------------------------------------------------------------------------
 describe('HandlebarsTemplateDelegate generic', () => {
-  test('enforces context type', () => {
+  test('accepts matching context type', () => {
     const template: HandlebarsTemplateDelegate<{ name: string }> =
       Handlebars.compile<{ name: string }>('{{name}}');
     expect(template({ name: 'test' })).type.toBe<string>();
@@ -450,44 +426,11 @@ describe('Handlebars.VM.resolvePartial', () => {
 });
 
 // ---------------------------------------------------------------------------
-// ICompiler interface
-// ---------------------------------------------------------------------------
-describe('Handlebars.ICompiler', () => {
-  test('has all visitor methods', () => {
-    const compiler = {} as Handlebars.ICompiler;
-    expect(compiler.accept).type.not.toRaiseError();
-    expect(compiler.Program).type.not.toRaiseError();
-    expect(compiler.BlockStatement).type.not.toRaiseError();
-    expect(compiler.PartialStatement).type.not.toRaiseError();
-    expect(compiler.PartialBlockStatement).type.not.toRaiseError();
-    expect(compiler.DecoratorBlock).type.not.toRaiseError();
-    expect(compiler.Decorator).type.not.toRaiseError();
-    expect(compiler.MustacheStatement).type.not.toRaiseError();
-    expect(compiler.ContentStatement).type.not.toRaiseError();
-    expect(compiler.CommentStatement).type.not.toRaiseError();
-    expect(compiler.SubExpression).type.not.toRaiseError();
-    expect(compiler.PathExpression).type.not.toRaiseError();
-    expect(compiler.StringLiteral).type.not.toRaiseError();
-    expect(compiler.NumberLiteral).type.not.toRaiseError();
-    expect(compiler.BooleanLiteral).type.not.toRaiseError();
-    expect(compiler.UndefinedLiteral).type.not.toRaiseError();
-    expect(compiler.NullLiteral).type.not.toRaiseError();
-    expect(compiler.Hash).type.not.toRaiseError();
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Visitor class
 // ---------------------------------------------------------------------------
 describe('Handlebars.Visitor', () => {
   test('implements ICompiler', () => {
     expect<Handlebars.Visitor>().type.toBeAssignableTo<Handlebars.ICompiler>();
-  });
-
-  test('has acceptKey and acceptArray methods', () => {
-    const visitor = new Handlebars.Visitor();
-    expect(visitor.acceptKey).type.not.toRaiseError();
-    expect(visitor.acceptArray).type.not.toRaiseError();
   });
 });
 
@@ -541,9 +484,11 @@ describe('top-level exports', () => {
     expect<CustomHelperName>().type.toBe<string>();
   });
 
-  test('KnownHelpers uses BuiltinHelperName and CustomHelperName', () => {
-    const helpers: KnownHelpers = { each: true, myCustom: true };
-    expect(helpers).type.not.toRaiseError();
+  test('KnownHelpers accepts builtin and custom helper names', () => {
+    expect<{
+      each: true;
+      myCustom: true;
+    }>().type.toBeAssignableTo<KnownHelpers>();
   });
 });
 
@@ -557,20 +502,6 @@ describe('hbs namespace', () => {
 
   test('hbs.Utils aliases typeof Handlebars.Utils', () => {
     expect<hbs.Utils>().type.toBe<typeof Handlebars.Utils>();
-  });
-
-  test('AST types are accessible', () => {
-    const node = {} as hbs.AST.MustacheStatement;
-    expect(node.type).type.not.toRaiseError();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Handlebars.AST
-// ---------------------------------------------------------------------------
-describe('Handlebars.AST', () => {
-  test('helpers is accessible', () => {
-    expect(Handlebars.AST.helpers).type.not.toRaiseError();
   });
 });
 

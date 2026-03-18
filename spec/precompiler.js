@@ -83,8 +83,8 @@ describe('precompiler', function () {
     console.error = errorLogFunction;
   });
 
-  it('should output version', function () {
-    Precompiler.cli({ templates: [], version: true });
+  it('should output version', async function () {
+    await Precompiler.cli({ templates: [], version: true });
     expect(log).toBe(Handlebars.VERSION);
   });
   it('should throw if lacking templates', async function () {
@@ -93,6 +93,9 @@ describe('precompiler', function () {
     );
   });
   it('should handle empty/filtered directories', async function () {
+    Handlebars.precompile = function () {
+      return 'simple';
+    };
     await Precompiler.cli({ hasDirectory: true, templates: [] });
     // Success is not throwing
   });
@@ -123,32 +126,32 @@ describe('precompiler', function () {
     ).rejects.toThrow('Unable to output multiple templates in simple mode');
   });
 
-  it('should output simple templates', function () {
+  it('should output simple templates', async function () {
     Handlebars.precompile = function () {
       return 'simple';
     };
-    Precompiler.cli({ templates: [emptyTemplate], simple: true });
+    await Precompiler.cli({ templates: [emptyTemplate], simple: true });
     expect(log).toBe('simple\n');
   });
-  it('should default to simple templates', function () {
+  it('should default to simple templates', async function () {
     Handlebars.precompile = function () {
       return 'simple';
     };
-    Precompiler.cli({ templates: [{ source: '' }] });
+    await Precompiler.cli({ templates: [{ source: '' }] });
     expect(log).toBe('simple\n');
   });
-  it('should output amd templates', function () {
+  it('should output amd templates', async function () {
     Handlebars.precompile = function () {
       return 'amd';
     };
-    Precompiler.cli({ templates: [emptyTemplate], amd: true });
+    await Precompiler.cli({ templates: [emptyTemplate], amd: true });
     expect(log).toMatch(/template\(amd\)/);
   });
-  it('should output multiple amd', function () {
+  it('should output multiple amd', async function () {
     Handlebars.precompile = function () {
       return 'amd';
     };
-    Precompiler.cli({
+    await Precompiler.cli({
       templates: [emptyTemplate, emptyTemplate],
       amd: true,
       namespace: 'foo',
@@ -157,19 +160,23 @@ describe('precompiler', function () {
     expect(log).toMatch(/return templates/);
     expect(log).toMatch(/template\(amd\)/);
   });
-  it('should output amd partials', function () {
+  it('should output amd partials', async function () {
     Handlebars.precompile = function () {
       return 'amd';
     };
-    Precompiler.cli({ templates: [emptyTemplate], amd: true, partial: true });
+    await Precompiler.cli({
+      templates: [emptyTemplate],
+      amd: true,
+      partial: true,
+    });
     expect(log).toMatch(/return Handlebars\.partials\['empty'\]/);
     expect(log).toMatch(/template\(amd\)/);
   });
-  it('should output multiple amd partials', function () {
+  it('should output multiple amd partials', async function () {
     Handlebars.precompile = function () {
       return 'amd';
     };
-    Precompiler.cli({
+    await Precompiler.cli({
       templates: [emptyTemplate, emptyTemplate],
       amd: true,
       partial: true,
@@ -177,36 +184,44 @@ describe('precompiler', function () {
     expect(log).not.toMatch(/return Handlebars\.partials\[/);
     expect(log).toMatch(/template\(amd\)/);
   });
-  it('should output commonjs templates', function () {
+  it('should output commonjs templates', async function () {
     Handlebars.precompile = function () {
       return 'commonjs';
     };
-    Precompiler.cli({ templates: [emptyTemplate], commonjs: true });
+    await Precompiler.cli({ templates: [emptyTemplate], commonjs: true });
     expect(log).toMatch(/template\(commonjs\)/);
   });
 
-  it('should set data flag', function () {
+  it('should set data flag', async function () {
     Handlebars.precompile = function (data, options) {
       expect(options.data).toBe(true);
       return 'simple';
     };
-    Precompiler.cli({ templates: [emptyTemplate], simple: true, data: true });
+    await Precompiler.cli({
+      templates: [emptyTemplate],
+      simple: true,
+      data: true,
+    });
     expect(log).toBe('simple\n');
   });
 
-  it('should set known helpers', function () {
+  it('should set known helpers', async function () {
     Handlebars.precompile = function (data, options) {
       expect(options.knownHelpers.foo).toBe(true);
       return 'simple';
     };
-    Precompiler.cli({ templates: [emptyTemplate], simple: true, known: 'foo' });
+    await Precompiler.cli({
+      templates: [emptyTemplate],
+      simple: true,
+      known: 'foo',
+    });
     expect(log).toBe('simple\n');
   });
-  it('should output to file system', function () {
+  it('should output to file system', async function () {
     Handlebars.precompile = function () {
       return 'simple';
     };
-    Precompiler.cli({
+    await Precompiler.cli({
       templates: [emptyTemplate],
       simple: true,
       output: 'file!',
@@ -216,14 +231,14 @@ describe('precompiler', function () {
     expect(log).toBe('');
   });
 
-  it('should output minimized templates', function () {
+  it('should output minimized templates', async function () {
     Handlebars.precompile = function () {
       return 'amd';
     };
     uglify.minify = function () {
       return { code: 'min' };
     };
-    Precompiler.cli({ templates: [emptyTemplate], min: true });
+    await Precompiler.cli({ templates: [emptyTemplate], min: true });
     expect(log).toBe('min');
   });
 

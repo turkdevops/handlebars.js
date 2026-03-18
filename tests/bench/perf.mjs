@@ -51,6 +51,17 @@ if (grepIdx !== -1 && args[grepIdx + 1]) {
   }
 }
 
+const sectionIdx = args.indexOf('--section');
+let sectionPattern = null;
+if (sectionIdx !== -1 && args[sectionIdx + 1]) {
+  try {
+    sectionPattern = new RegExp(args[sectionIdx + 1], 'i');
+  } catch (e) {
+    console.error(`Invalid --section pattern: ${e.message}`);
+    process.exit(1);
+  }
+}
+
 // ─── Filter templates ───────────────────────────────────────────────────────
 
 const templates = Object.fromEntries(
@@ -92,7 +103,14 @@ function createEnv(def) {
   return hb;
 }
 
+function shouldRunSection(title) {
+  if (!sectionPattern) return true;
+  return sectionPattern.test(title);
+}
+
 async function runSection(title, config, setup) {
+  if (!shouldRunSection(title)) return null;
+
   printSectionHeader(title);
 
   const bench = newBench(config);
@@ -120,6 +138,11 @@ async function run() {
 
   const allSections = [];
 
+  if (sectionPattern) {
+    console.log(`Filtering sections: /${sectionPattern.source}/i`);
+    console.log();
+  }
+
   // ─── COMPILATION ────────────────────────────────────────────────────────────
 
   allSections.push(
@@ -143,40 +166,41 @@ async function run() {
 
   const expectedOutputs = {};
 
-  allSections.push(
-    await runSection(
-      'EXECUTION (template rendering)',
-      EXEC_BENCH_CONFIG,
-      (bench) => {
-        for (const [name, def] of Object.entries(templates)) {
-          const compiled = createEnv(def).compile(def.template);
-          expectedOutputs[name] = compiled(def.context);
-          bench.add(`exec: ${name}`, () => {
-            compiled(def.context);
-          });
-        }
+  const execResult = await runSection(
+    'EXECUTION (template rendering)',
+    EXEC_BENCH_CONFIG,
+    (bench) => {
+      for (const [name, def] of Object.entries(templates)) {
+        const compiled = createEnv(def).compile(def.template);
+        expectedOutputs[name] = compiled(def.context);
+        bench.add(`exec: ${name}`, () => {
+          compiled(def.context);
+        });
       }
-    )
+    }
   );
+  allSections.push(execResult);
 
   // Verify outputs haven't changed during benchmarking
-  let verifyFails = 0;
-  for (const [name, def] of Object.entries(templates)) {
-    const compiled = createEnv(def).compile(def.template);
-    const actual = compiled(def.context);
-    if (actual !== expectedOutputs[name]) {
-      console.warn(
-        `  WARNING: output mismatch for "${name}"\n    expected: ${JSON.stringify(expectedOutputs[name])}\n    actual:   ${JSON.stringify(actual)}`
-      );
-      verifyFails++;
+  if (execResult) {
+    let verifyFails = 0;
+    for (const [name, def] of Object.entries(templates)) {
+      const compiled = createEnv(def).compile(def.template);
+      const actual = compiled(def.context);
+      if (actual !== expectedOutputs[name]) {
+        console.warn(
+          `  WARNING: output mismatch for "${name}"\n    expected: ${JSON.stringify(expectedOutputs[name])}\n    actual:   ${JSON.stringify(actual)}`
+        );
+        verifyFails++;
+      }
     }
+    if (verifyFails === 0) {
+      console.log('Output verification: all templates OK');
+    } else {
+      console.warn(`Output verification: ${verifyFails} mismatch(es)`);
+    }
+    console.log();
   }
-  if (verifyFails === 0) {
-    console.log('Output verification: all templates OK');
-  } else {
-    console.warn(`Output verification: ${verifyFails} mismatch(es)`);
-  }
-  console.log();
 
   // ─── PRECOMPILATION ─────────────────────────────────────────────────────────
 
@@ -249,7 +273,7 @@ async function run() {
     )
   );
 
-  const filepath = saveMarkdownReport(allSections, {
+  const filepath = saveMarkdownReport(allSections.filter(Boolean), {
     label,
     compileConfig: COMPILE_BENCH_CONFIG,
     execConfig: EXEC_BENCH_CONFIG,

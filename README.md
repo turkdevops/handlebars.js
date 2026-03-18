@@ -115,6 +115,13 @@ npm run bench
 # Run with a custom label
 npm run bench -- --label my-optimization
 
+# Filter templates by name (regex, case-insensitive)
+npm run bench -- --grep "complex|recursive"
+
+# Run only specific sections (regex, case-insensitive)
+npm run bench -- --section precompil
+npm run bench -- --section "compilation|precompil"
+
 # Compare results
 npm run bench:compare
 

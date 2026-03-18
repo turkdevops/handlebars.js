@@ -5,7 +5,6 @@ import {
   HandlebarsTemplateDelegate,
   HandlebarsTemplates,
   TemplateSpecification,
-  RuntimeOptions,
   KnownHelpers,
   BuiltinHelperName,
   CustomHelperName,

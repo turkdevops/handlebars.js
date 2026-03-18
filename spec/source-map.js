@@ -25,7 +25,7 @@ describe('source-map', function () {
       expect(template.map).toBeTruthy();
     }
   });
-  it('should map source properly', function () {
+  it('should map source properly', async function () {
     var templateSource =
         '  b{{hello}}  \n  {{bar}}a {{#block arg hash=(subex 1 subval)}}{{/block}}',
       template = Handlebars.precompile(templateSource, {
@@ -34,7 +34,7 @@ describe('source-map', function () {
       });
 
     if (template.map) {
-      var consumer = new SourceMapConsumer(template.map),
+      var consumer = await new SourceMapConsumer(template.map),
         lines = template.code.split('\n'),
         srcLines = templateSource.split('\n'),
         generated = grepLine('"  b"', lines),
@@ -43,6 +43,7 @@ describe('source-map', function () {
       var mapped = consumer.originalPositionFor(generated);
       expect(mapped.line).toBe(source.line);
       expect(mapped.column).toBe(source.column);
+      consumer.destroy();
     }
   });
 });

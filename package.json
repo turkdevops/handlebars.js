@@ -42,7 +42,7 @@
     "lint": "npm run lint:oxlint && npm run lint:format && npm run lint:types && npm run lint:compat",
     "lint:oxlint": "oxlint --max-warnings 0 .",
     "lint:format": "oxfmt --check .",
-    "lint:types": "tsc --noEmit --project types",
+    "lint:types": "tsc --noEmit --project types && tstyche",
     "lint:compat": "eslint",
     "test": "npm run build && vitest run --project node --project tasks --project rspack --coverage",
     "test:browser": "vitest run --project browser",
@@ -85,6 +85,7 @@
     "oxlint": "^1.51.0",
     "semver": "^5.0.1",
     "tinybench": "^6.0.0",
+    "tstyche": "^6.2.0",
     "typescript": "^5.9.3",
     "uglify-js": "^3.19.3",
     "vitest": "^4.0.18"

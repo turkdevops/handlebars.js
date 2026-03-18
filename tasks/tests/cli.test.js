@@ -1,87 +1,128 @@
+const fs = require('fs');
 const { execCommand, FileTestHelper } = require('cli-testlab');
 const Handlebars = require('../../lib');
 
 const cli = 'node ./bin/handlebars.js';
 
-describe('bin/handlebars (cli-testlab)', function () {
+expect.extend({
+  toEqualWithRelaxedSpace(received, expected) {
+    const normalize = (str) =>
+      typeof str === 'string'
+        ? str
+            .replace(/\r\n/g, '\n')
+            .split('\n')
+            .map((line) => line.replace(/\s+/g, ' ').trim())
+            .filter((line) => line.length > 0)
+            .join('\n')
+            .trim()
+        : str;
+
+    const normalizedReceived = normalize(received);
+    const normalizedExpected = normalize(expected);
+    const pass = normalizedReceived === normalizedExpected;
+
+    return {
+      pass,
+      message: () =>
+        `Expected output to match with relaxed whitespace.\n\n` +
+        `Expected:\n${normalizedExpected}\n\nReceived:\n${normalizedReceived}`,
+    };
+  },
+});
+
+function expectedFile(specPath) {
+  return fs.readFileSync(specPath, 'utf-8');
+}
+
+describe('bin/handlebars', function () {
   describe('help and version', function () {
-    it('should display help menu with --help', async function () {
-      await execCommand(`${cli} --help`, {
-        expectedOutput: [
-          'Precompile handlebar templates.',
-          'Usage:',
-          '--output',
-          '--amd',
-          '--commonjs',
-          '--partial',
-          '--extension',
-          '--bom',
-        ],
-      });
+    it('--help displays help menu', async function () {
+      const result = await execCommand(`${cli} --help`);
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/help.menu.txt')
+      );
     });
 
-    it('should display version with -v', async function () {
+    it('no arguments displays help menu', async function () {
+      const result = await execCommand(`${cli}`);
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/help.menu.txt')
+      );
+    });
+
+    it('-v prints the compiler version', async function () {
       await execCommand(`${cli} -v`, {
         expectedOutput: Handlebars.VERSION,
       });
     });
-
-    it('should display help when no arguments are provided', async function () {
-      await execCommand(`${cli}`, {
-        expectedOutput: 'Precompile handlebar templates.',
-      });
-    });
   });
 
-  describe('precompilation output modes', function () {
-    it('should precompile a template in AMD mode', async function () {
+  describe('AMD output', function () {
+    it('-a produces AMD output', async function () {
       const result = await execCommand(
         `${cli} -a spec/artifacts/empty.handlebars`
       );
-      expect(result.stdout).toContain("define(['handlebars.runtime']");
-      expect(result.stdout).toContain("templates['empty']");
-    });
-
-    it('should precompile a template in CommonJS mode', async function () {
-      const result = await execCommand(
-        `${cli} spec/artifacts/empty.handlebars -c`
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.amd.js')
       );
-      expect(result.stdout).toContain('Handlebars.template');
-      expect(result.stdout).not.toContain("define(['handlebars.runtime']");
     });
 
-    it('should precompile in simple mode', async function () {
+    it('-a -s produces simple AMD output', async function () {
       const result = await execCommand(
         `${cli} -a -s spec/artifacts/empty.handlebars`
       );
-      expect(result.stdout).toContain('"compiler"');
-      expect(result.stdout).toContain('"main"');
-      expect(result.stdout).not.toContain("templates['empty']");
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.amd.simple.js')
+      );
     });
 
-    it('should precompile with minification', async function () {
+    it('-a -m produces minified AMD output', async function () {
       const result = await execCommand(
         `${cli} -a -m spec/artifacts/empty.handlebars`
       );
-      expect(result.stdout).toContain('define(');
-      expect(result.stdout).toContain('handlebars.runtime');
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.amd.min.js')
+      );
     });
   });
 
-  describe('custom namespace', function () {
-    it('should use custom namespace with -n', async function () {
+  describe('CommonJS output', function () {
+    it('-c produces CommonJS output', async function () {
+      const result = await execCommand(
+        `${cli} spec/artifacts/empty.handlebars -c`
+      );
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.common.js')
+      );
+    });
+  });
+
+  describe('namespace', function () {
+    it('-n sets custom namespace', async function () {
       const result = await execCommand(
         `${cli} -a -n CustomNamespace.templates spec/artifacts/empty.handlebars`
       );
-      expect(result.stdout).toContain('CustomNamespace.templates');
-      expect(result.stdout).not.toContain('Handlebars.templates');
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.amd.namespace.js')
+      );
     });
 
-    it('should use custom namespace with --namespace', async function () {
+    it('--namespace sets custom namespace', async function () {
       const result = await execCommand(
         `${cli} -a --namespace CustomNamespace.templates spec/artifacts/empty.handlebars`
       );
-      expect(result.stdout).toContain('CustomNamespace.templates');
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.amd.namespace.js')
+      );
+    });
+
+    it('multiple files share a namespace', async function () {
+      const result = await execCommand(
+        `${cli} spec/artifacts/empty.handlebars spec/artifacts/empty.handlebars -a -n someNameSpace`
+      );
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/namespace.amd.js')
+      );
     });
   });
 
@@ -97,8 +138,8 @@ describe('bin/handlebars (cli-testlab)', function () {
       files.cleanup();
     });
 
-    it('should write output to a file with -f', async function () {
-      const outputFile = 'tmp/cli-testlab-output.js';
+    it('-f writes output to a file', async function () {
+      const outputFile = 'tmp/cli-test-output.js';
       files.registerForCleanup(outputFile);
 
       await execCommand(
@@ -107,21 +148,22 @@ describe('bin/handlebars (cli-testlab)', function () {
 
       expect(files.fileExists(outputFile)).toBe(true);
       const content = files.getFileTextContent(outputFile);
-      expect(content).toContain("define(['handlebars.runtime']");
-      expect(content).toContain("templates['empty']");
+      expect(content).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.amd.js')
+      );
     });
 
-    it('should generate source map file with --map', async function () {
-      const mapFile = 'tmp/cli-testlab-source.map';
+    it('--map writes source map and appends sourceMappingURL', async function () {
+      const mapFile = 'tmp/cli-test-source.map';
       files.registerForCleanup(mapFile);
 
-      await execCommand(
+      const result = await execCommand(
         `${cli} -i "<div>1</div>" -a -m -N test --map ${mapFile}`
       );
 
+      expect(result.stdout).toContain('sourceMappingURL=');
       expect(files.fileExists(mapFile)).toBe(true);
-      const mapContent = files.getFileTextContent(mapFile);
-      const parsed = JSON.parse(mapContent);
+      const parsed = JSON.parse(files.getFileTextContent(mapFile));
       expect(parsed).toHaveProperty('version', 3);
       expect(parsed).toHaveProperty('sources');
       expect(parsed).toHaveProperty('mappings');
@@ -129,39 +171,63 @@ describe('bin/handlebars (cli-testlab)', function () {
   });
 
   describe('template options', function () {
-    it('should support custom extension with -e', async function () {
+    it('-e sets custom extension', async function () {
       const result = await execCommand(
         `${cli} -a -e hbs ./spec/artifacts/non.default.extension.hbs`
       );
-      expect(result.stdout).toContain("define(['handlebars.runtime']");
-      expect(result.stdout).toContain("templates['non.default.extension']");
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/non.default.extension.amd.js')
+      );
     });
 
-    it('should compile as partial with -p', async function () {
+    it('-p compiles as partial', async function () {
       const result = await execCommand(
         `${cli} -a -p ./spec/artifacts/partial.template.handlebars`
       );
-      expect(result.stdout).toContain('Handlebars.partials');
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/partial.template.js')
+      );
     });
 
-    it('should strip root from template names with -r', async function () {
+    it('-r strips root from template names', async function () {
       const result = await execCommand(
         `${cli} spec/artifacts/partial.template.handlebars -r spec -a`
       );
-      expect(result.stdout).not.toContain("templates['spec/");
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.root.amd.js')
+      );
     });
 
-    it('should strip BOM with -b', async function () {
+    it('-b strips BOM', async function () {
       const result = await execCommand(
         `${cli} ./spec/artifacts/bom.handlebars -b -a`
       );
-      expect(result.stdout).not.toContain('\uFEFF');
-      expect(result.stdout).toContain("define(['handlebars.runtime']");
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/bom.amd.js')
+      );
+    });
+
+    it('-h sets custom handlebar path', async function () {
+      const result = await execCommand(
+        `${cli} spec/artifacts/empty.handlebars -h some-path/ -a`
+      );
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/handlebar.path.amd.js')
+      );
+    });
+
+    it('-k -o sets known helpers only', async function () {
+      const result = await execCommand(
+        `${cli} spec/artifacts/known.helpers.handlebars -a -k someHelper -k anotherHelper -o`
+      );
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/non.empty.amd.known.helper.js')
+      );
     });
   });
 
   describe('inline templates', function () {
-    it('should compile inline template with -i', async function () {
+    it('-i compiles inline template', async function () {
       const result = await execCommand(
         `${cli} -i "<div>hello</div>" -a -N myTemplate`
       );
@@ -169,52 +235,24 @@ describe('bin/handlebars (cli-testlab)', function () {
       expect(result.stdout).toContain("templates['myTemplate']");
     });
 
-    it('should compile multiple inline templates', async function () {
+    it('-i compiles multiple inline templates with -N', async function () {
       const result = await execCommand(
-        `${cli} -i "<div>1</div>" -i "<div>2</div>" -N first -N second -a`
+        `${cli} -i "<div>1</div>" -i "<div>2</div>" -N firstTemplate -N secondTemplate -a`
       );
-      expect(result.stdout).toContain("templates['first']");
-      expect(result.stdout).toContain("templates['second']");
-    });
-  });
-
-  describe('known helpers', function () {
-    it('should accept known helpers with -k', async function () {
-      const result = await execCommand(
-        `${cli} spec/artifacts/known.helpers.handlebars -a -k someHelper -k anotherHelper -o`
-      );
-      expect(result.stdout).toContain("define(['handlebars.runtime']");
-    });
-  });
-
-  describe('handlebar path', function () {
-    it('should accept custom handlebar path with -h', async function () {
-      const result = await execCommand(
-        `${cli} spec/artifacts/empty.handlebars -h some-path/ -a`
-      );
-      expect(result.stdout).toContain(
-        "define(['some-path/handlebars.runtime']"
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.name.amd.js')
       );
     });
   });
 
   describe('negated boolean flags', function () {
-    it('should support --no-amd to negate --amd (issue #1673)', async function () {
+    it('--no-amd negates --amd (issue #1673)', async function () {
       const result = await execCommand(
         `${cli} --amd --no-amd spec/artifacts/empty.handlebars`
       );
-      expect(result.stdout).not.toContain("define(['handlebars.runtime']");
-      expect(result.stdout).toContain('Handlebars.template');
-    });
-  });
-
-  describe('multiple files', function () {
-    it('should precompile multiple files into a single output', async function () {
-      const result = await execCommand(
-        `${cli} spec/artifacts/empty.handlebars spec/artifacts/empty.handlebars -a -n someNameSpace`
+      expect(result.stdout).toEqualWithRelaxedSpace(
+        expectedFile('./spec/expected/empty.common.js')
       );
-      expect(result.stdout).toContain('someNameSpace');
-      expect(result.stdout).toContain("define(['handlebars.runtime']");
     });
   });
 });

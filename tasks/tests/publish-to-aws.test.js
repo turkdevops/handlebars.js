@@ -1,8 +1,9 @@
 const fs = require('fs');
 const { S3, GetObjectCommand } = require('@aws-sdk/client-s3');
 
+const BUCKET = 'test-bucket';
+
 const {
-  BUCKET,
   PUBLISHED_FILES,
   buildSuffixes,
   validateS3Env,
@@ -34,7 +35,6 @@ afterAll(async () => {
 
 beforeEach(() => {
   server.reset();
-  server.createBucket(BUCKET);
 });
 
 async function getObjectBody(key) {

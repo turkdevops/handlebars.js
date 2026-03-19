@@ -4,7 +4,6 @@ const { S3, PutObjectCommand } = require('@aws-sdk/client-s3');
 const git = require('./util/git');
 const semver = require('semver');
 
-const BUCKET = 'builds.handlebarsjs.com';
 const PUBLISHED_FILES = [
   'handlebars.js',
   'handlebars.min.js',
@@ -108,7 +107,6 @@ function getLocalFile(filename) {
 }
 
 module.exports = {
-  BUCKET,
   PUBLISHED_FILES,
   buildSuffixes,
   validateS3Env,

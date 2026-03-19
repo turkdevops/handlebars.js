@@ -17,6 +17,7 @@ export default defineConfig({
         test: {
           name: 'tasks',
           include: ['tasks/tests/*.test.js'],
+          exclude: ['tasks/tests/publish-to-aws.test.js'],
           globals: true,
           pool: 'forks',
         },
@@ -26,6 +27,14 @@ export default defineConfig({
           name: 'rspack',
           include: ['tests/rspack/*.test.js'],
           globals: true,
+        },
+      },
+      {
+        test: {
+          name: 'publish',
+          include: ['tasks/tests/publish-to-aws.test.js'],
+          globals: true,
+          pool: 'forks',
         },
       },
       {

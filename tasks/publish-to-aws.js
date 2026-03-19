@@ -4,6 +4,14 @@ const { S3, PutObjectCommand } = require('@aws-sdk/client-s3');
 const git = require('./util/git');
 const semver = require('semver');
 
+const BUCKET = 'builds.handlebarsjs.com';
+const PUBLISHED_FILES = [
+  'handlebars.js',
+  'handlebars.min.js',
+  'handlebars.runtime.js',
+  'handlebars.runtime.min.js',
+];
+
 let s3Client;
 
 async function main() {
@@ -56,13 +64,7 @@ async function publish(suffixes, overrides) {
 }
 
 async function publishSuffix(suffix, overrides) {
-  const filenames = [
-    'handlebars.js',
-    'handlebars.min.js',
-    'handlebars.runtime.js',
-    'handlebars.runtime.min.js',
-  ];
-  const publishPromises = filenames.map(async (filename) => {
+  const publishPromises = PUBLISHED_FILES.map(async (filename) => {
     const nameInBucket = getNameInBucket(filename, suffix);
     const localFile = getLocalFile(filename);
     await uploadToBucket(localFile, nameInBucket, overrides);
@@ -106,6 +108,8 @@ function getLocalFile(filename) {
 }
 
 module.exports = {
+  BUCKET,
+  PUBLISHED_FILES,
   buildSuffixes,
   validateS3Env,
   publish,

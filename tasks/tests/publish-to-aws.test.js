@@ -2,20 +2,14 @@ const fs = require('fs');
 const { S3, GetObjectCommand } = require('@aws-sdk/client-s3');
 
 const {
+  BUCKET,
+  PUBLISHED_FILES,
   buildSuffixes,
   validateS3Env,
   publish,
   getNameInBucket,
   getLocalFile,
 } = require('../publish-to-aws');
-
-const BUCKET = 'builds.handlebarsjs.com';
-const PUBLISHED_FILES = [
-  'handlebars.js',
-  'handlebars.min.js',
-  'handlebars.runtime.js',
-  'handlebars.runtime.min.js',
-];
 
 let startFauxqs;
 let server;

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { S3, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { createFakeS3 } = require('./fake-s3');
 
 const BUCKET = 'test-bucket';
 
@@ -12,13 +13,11 @@ const {
   getLocalFile,
 } = require('../publish-to-aws');
 
-let startFauxqs;
 let server;
 let s3Client;
 
 beforeAll(async () => {
-  ({ startFauxqs } = await import('fauxqs'));
-  server = await startFauxqs({ port: 0, logger: false });
+  server = await createFakeS3().start();
   server.createBucket(BUCKET);
 
   s3Client = new S3({
